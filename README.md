@@ -1,5 +1,5 @@
 # subnetter
-Python script for generating repetitive config files from a JSON description of IPv4 networks
+Python script for generating repetitive config files from a JSON description of ip networks
 
 ## Usage
 

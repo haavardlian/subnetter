@@ -1,15 +1,15 @@
 [
     {
-        "network" : "192.168.0.0/24",
+        "network" : "192.168.0.0/22",
         "subnets" : [
             {
                 "size" : 27,
                 "per-row": 1,
                 "name": "Deltakerrad",
-                "number" : 4
+                "number" : 23
             },
             {
-                "size" : 26,
+                "size" : 25,
                 "name" : "Tech"
             },
             {

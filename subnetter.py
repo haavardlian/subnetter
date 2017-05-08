@@ -7,7 +7,7 @@ import math
 
 from os import makedirs, path
 
-from sys import stderr
+from sys import exit, stderr
 
 from jinja2 import FileSystemLoader
 from jinja2.environment import Environment
@@ -29,6 +29,9 @@ class Subnet:
     def __repr__(self):
         return str(self)
 
+    def __format__(self, spec):
+        return str(self)
+
 
 def split_network(network):
     new_network = []
@@ -36,6 +39,10 @@ def split_network(network):
         new_network.extend(list(net.subnets()))
 
     return new_network
+
+
+def merge_networks(networks):
+    return list(ipaddress.collapse_addresses(networks))
 
 
 def create_config_from_template(template_path, attr):
@@ -70,7 +77,7 @@ def write_to_file(out_dir, name, content):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Divides IPv4 networks based on JSON description'
+    parser = argparse.ArgumentParser(description='Divides networks based on JSON description'
                                                  ' and generates config files based on jinja2 templates.')
     parser.add_argument('-n', '--network', dest='network_file', action='store', required=True,
                         help='File containing network description in JSON format')
@@ -91,7 +98,7 @@ def main():
     for part in json_data:
         network = ipaddress.ip_network(part['network'])
         total = 0
-        largest_network = 32
+        largest_network = network.max_prefixlen
         smallest_network = 0
         network_list = []
         for subnet in part['subnets']:
@@ -102,7 +109,7 @@ def main():
             if subnet['number'] == 0:
                 continue
 
-            total += int(math.pow(2, 32 - subnet['size']) * subnet['number'] * subnet['per-row'])
+            total += int(math.pow(2, network.max_prefixlen - subnet['size']) * subnet['number'] * subnet['per-row'])
 
             if subnet['size'] < largest_network:
                     largest_network = subnet['size']
@@ -120,39 +127,39 @@ def main():
                 network_list.append(Subnet(subnet['size'], subnet['name']))
 
         if total > network.num_addresses:
-            print('Can\'t fit subnets into network :(', file=stderr)
+            print('Can\'t fit subnets into network :(. Tried to fit {} addresses into {} ({} addresses)'
+                  .format(total, network, network.num_addresses), file=stderr)
             return 1
 
+        networks = list(network.subnets(new_prefix=largest_network))
         done = False
-        network = list(network.subnets(new_prefix=largest_network))
         while not done:
-            if len(network) == 0:
-                print('Can\'t fit subnets into network :(', file=stderr)
-                return 1
-
             for net in network_list:
                 if net.size == largest_network and net.network is None:
-                    net.network = network.pop(0)
+                    net.network = networks.pop(0)
 
-            largest_network += 1
-            if largest_network > smallest_network:
-                break
-            network = split_network(list(network))
             done = True
             for net in network_list:
                 if net.network is None:
                     done = False
+                    largest_network += 1
+                    networks = split_network(list(networks))
                     break
 
-        for i in range(len(network_list)):
-            attributes = get_network_attributes(network_list[i], i + 1)
+        for i, net in enumerate(network_list):
+            attributes = get_network_attributes(net, i + 1)
             if args.file:
                 if not path.exists(args.out_dir):
                     makedirs(args.out_dir)
                 write_to_file(args.out_dir, attributes['row'], create_config_from_template(args.template, attributes))
             else:
                 print(create_config_from_template(args.template, attributes))
+
+        if len(networks):
+            merged = [str(net) for net in merge_networks(networks)]
+            s = 's' if len(merged) > 1 else ''
+            print("Remaining network{}: {}".format(s, ", ".join(merged)), file=stderr)
     return 0
 
 if __name__ == '__main__':
-    main()
+    exit(main())

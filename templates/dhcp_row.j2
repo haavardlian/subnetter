@@ -2,7 +2,7 @@
 subnet {{ network }} netmask {{ netmask }}  {
     option subnet-mask {{ netmask }} ;
     option routers {{ gateway }};
-    option domain-name "{{ row }}.somelan";
-    ddns-domainname "{{ row }}.somelan";
+    option domain-name "{{ name|lower }}.somelan";
+    ddns-domainname "{{ name|lower }}.somelan";
     range {{ start }} {{ end }};
 }
