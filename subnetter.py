@@ -50,12 +50,13 @@ def create_config_from_template(template_path, attr):
 def get_network_attributes(subnet, port):
     attr = {
         'port': port,
-        'row': subnet.name.lower(),
+        'name': subnet.name,
         'network': str(subnet.network.network_address),
         'gateway': str(subnet.network[1]),
         'start': str(subnet.network[2]),
         'start_next': str(subnet.network[3]),
         'end': str(subnet.network[-2]),
+        'broadcast': str(subnet.network[-1]),
         'netmask': subnet.network.netmask,
         'size': subnet.network.prefixlen,
     }

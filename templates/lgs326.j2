@@ -6,7 +6,7 @@ set system
 @
 ip access-list extended Administration
 exit
-hostname {{ row }}
+hostname {{ name }}
 management access-list Administration
 permit ip-source 10.0.1.100 mask 255.255.254.0 gigabitethernet26 
 exit
