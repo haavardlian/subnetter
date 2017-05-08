@@ -1,0 +1,14 @@
+pipeline:
+    flake:
+        image: python:3.5.3-alpine
+        pull: true
+        commands:
+            - pip install flake8 pyinstaller
+            - pip install -r requirements.txt
+            - flake8
+            - pyinstaller -F subnetter.py
+    github_release:
+        image: plugins/github-release
+        files: dist/*
+        when:
+            event: tag

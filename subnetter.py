@@ -155,5 +155,6 @@ def main():
             print("Remaining network{}: {}".format(s, ", ".join(merged)), file=stderr)
     return 0
 
+
 if __name__ == '__main__':
     exit(main())
