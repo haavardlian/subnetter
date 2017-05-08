@@ -66,6 +66,3 @@ Available parameters:
 | broadcast | The broadcast address | 192.168.0.255 |
 | netmask | The netmask | 255.255.255.0 |
 | size | The network prefix size | 24 |
-
-
-

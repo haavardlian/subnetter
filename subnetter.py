@@ -23,22 +23,19 @@ class Subnet:
     def __str__(self):
         return '{}: {}'.format(self.name, self.network)
 
-    def __unicode__(self):
-        return '{}: {}'.format(self.name, self.network)
+    def matches(self, size):
+        return self.network is None and self.size == size
 
-    def __repr__(self):
-        return str(self)
-
-    def __format__(self, spec):
-        return str(self)
+    def __lt__(self, other):
+        return self.network.compare_networks(other.network) == -1
 
 
-def split_network(network):
+def split_network(networks):
     new_network = []
-    for net in network:
+    for net in networks:
         new_network.extend(list(net.subnets()))
 
-    return new_network
+    return list(new_network)
 
 
 def merge_networks(networks):
@@ -56,7 +53,7 @@ def create_config_from_template(template_path, attr):
 
 def get_network_attributes(subnet, port):
     addresses = [str(ip) for ip in subnet.network]
-    attr = {
+    return {
         'port': port,
         'name': subnet.name,
         'network': addresses[0],
@@ -68,7 +65,6 @@ def get_network_attributes(subnet, port):
         'netmask': subnet.network.netmask,
         'size': subnet.network.prefixlen,
     }
-    return attr
 
 
 def write_to_file(out_dir, name, content):
@@ -100,7 +96,8 @@ def main():
         total = 0
         largest_network = network.max_prefixlen
         smallest_network = 0
-        network_list = []
+        subnets = []
+        # Create all subnets
         for subnet in part['subnets']:
             if 'per-row' not in subnet:
                 subnet['per-row'] = 1
@@ -120,41 +117,38 @@ def main():
                 for i in range(0, subnet['number']):
                     if subnet['per-row'] > 1:
                         for j in range(0, subnet['per-row']):
-                            network_list.append(Subnet(subnet['size'], '{}-{}-{}'.format(subnet['name'], i + 1, j + 1)))
+                            subnets.append(Subnet(subnet['size'], '{}-{}-{}'.format(subnet['name'], i + 1, j + 1)))
                     else:
-                        network_list.append(Subnet(subnet['size'], '{}-{}'.format(subnet['name'], i + 1)))
+                        subnets.append(Subnet(subnet['size'], '{}-{}'.format(subnet['name'], i + 1)))
             else:
-                network_list.append(Subnet(subnet['size'], subnet['name']))
+                subnets.append(Subnet(subnet['size'], subnet['name']))
 
+        # Check if we have enough addresses
         if total > network.num_addresses:
             print('Can\'t fit subnets into network :(. Tried to fit {} addresses into {} ({} addresses)'
                   .format(total, network, network.num_addresses), file=stderr)
             return 1
 
+        # Assign networks
         networks = list(network.subnets(new_prefix=largest_network))
-        done = False
-        while not done:
-            for net in network_list:
-                if net.size == largest_network and net.network is None:
-                    net.network = networks.pop(0)
+        while any(subnet.network is None for subnet in subnets):
+            current_size = networks[0].prefixlen if networks else 0
+            for subnet in [s for s in subnets if s.matches(current_size)]:
+                subnet.network = networks.pop(0)
+            networks = split_network(networks)
 
-            done = True
-            for net in network_list:
-                if net.network is None:
-                    done = False
-                    largest_network += 1
-                    networks = split_network(list(networks))
-                    break
-
-        for i, net in enumerate(network_list):
+        # Render templates and write to stdout or file
+        for i, net in enumerate(sorted(subnets)):
             attributes = get_network_attributes(net, i + 1)
+            rendered = create_config_from_template(args.template, attributes)
             if args.file:
                 if not path.exists(args.out_dir):
                     makedirs(args.out_dir)
-                write_to_file(args.out_dir, attributes['name'], create_config_from_template(args.template, attributes))
+                write_to_file(args.out_dir, attributes['name'], rendered)
             else:
-                print(create_config_from_template(args.template, attributes))
+                print(rendered)
 
+        # Print info about remaining networks
         if len(networks):
             merged = [str(net) for net in merge_networks(networks)]
             s = 's' if len(merged) > 1 else ''
