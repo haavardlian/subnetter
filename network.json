@@ -10,13 +10,11 @@
             },
             {
                 "size" : 26,
-                "name" : "Tech",
-                "number" : 1
+                "name" : "Tech"
             },
             {
                 "size" : 26,
-                "name" : "Wireless",
-                "number" : 1
+                "name" : "Wireless"
             }
         ]
     }

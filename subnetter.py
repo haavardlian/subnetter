@@ -95,10 +95,12 @@ def main():
         smallest_network = 0
         network_list = []
         for subnet in part['subnets']:
-            if subnet['number'] == 0:
-                continue
             if 'per-row' not in subnet:
                 subnet['per-row'] = 1
+            if 'number' not in subnet:
+                subnet['number'] = 1
+            if subnet['number'] == 0:
+                continue
 
             total += int(math.pow(2, 32 - subnet['size']) * subnet['number'] * subnet['per-row'])
 

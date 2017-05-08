@@ -15,9 +15,10 @@ Python script for generating repetitive config files from a JSON description of 
 The network description file is a JSON file that contain the networks what is used for generating the output.
 
 The base of the file is an array of network descriptions.
-Each description must contain a network and a list of subnets.
-Every subnet must specify its size the name and the number of subnets to generate. It can also specify a per-row
-parameter that describes how many config files should be generated for that one subnet.
+Each description must contain a ```network``` and a ```subnet``` list.
+Every subnet must specify its ```size``` and ```name```
+It can also specify a ```number``` and ```per-row``` parameter that describes how many config files should be generated for that subnet.
+Default values for these are 1. The total number of networks per entry is ```number * per-row```.
 
 Example file:
 ```json
@@ -33,8 +34,7 @@ Example file:
             },
             {
                 "size" : 26,
-                "name" : "Tech",
-                "number" : 1
+                "name" : "Tech"
             },
             {
                 "size" : 26,
