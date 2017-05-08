@@ -3,6 +3,13 @@ Python script for generating repetitive config files from a JSON description of 
 
 ## Usage
 
+| Parameter | Description | Default value |
+| --------- | ----------- | ------------- |
+| -n/--network  NETWORK | File containing network description in JSON format |  None. Required. |
+| -t/--template TEMPLATE | jinja2 template | None. Required. |
+| -f, --file | Output each resulting network to a file | None. Optional. |
+| -o/--output-dir OUT_DIR | Folder to store files in. Only has effect if -f is passed. | ./output |
+
 ### Network description file
 
 The network description file is a JSON file that contain the networks what is used for generating the output.
