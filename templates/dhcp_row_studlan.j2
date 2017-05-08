@@ -5,9 +5,9 @@ subnet {{ network }} netmask {{ netmask }}  {
         deny members of "linksys";
         option subnet-mask {{ netmask }} ;
         option routers {{ gateway }};
-        option domain-name "{{ row|lower }}.trondelan.no";
-        ddns-domainname "{{ row|lower }}.trondelan.no";
-        range {{ start_next }} {{ end }};
+        option domain-name "{{ name|lower }}.trondelan.no";
+        ddns-domainname "{{ name|lower }}.trondelan.no";
+        range {{ addresses[2] }} {{ end }};
     }
     pool {
         default-lease-time 100;

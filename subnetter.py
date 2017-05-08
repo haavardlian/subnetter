@@ -48,15 +48,16 @@ def create_config_from_template(template_path, attr):
 
 
 def get_network_attributes(subnet, port):
+    addresses = [str(ip) for ip in subnet.network]
     attr = {
         'port': port,
         'name': subnet.name,
-        'network': str(subnet.network.network_address),
-        'gateway': str(subnet.network[1]),
-        'start': str(subnet.network[2]),
-        'start_next': str(subnet.network[3]),
-        'end': str(subnet.network[-2]),
-        'broadcast': str(subnet.network[-1]),
+        'network': addresses[0],
+        'gateway': addresses[1],
+        'broadcast': addresses[-1],
+        'start': addresses[2],
+        'addresses': addresses[1:-1],
+        'end': addresses[-2],
         'netmask': subnet.network.netmask,
         'size': subnet.network.prefixlen,
     }
@@ -69,7 +70,7 @@ def write_to_file(out_dir, name, content):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Divide networks based on JSON description'
+    parser = argparse.ArgumentParser(description='Divides IPv4 networks based on JSON description'
                                                  ' and generates config files based on jinja2 templates.')
     parser.add_argument('-n', '--network', dest='network_file', action='store', required=True,
                         help='File containing network description in JSON format')

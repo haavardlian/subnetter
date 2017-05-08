@@ -1,5 +1,5 @@
 # subnetter
-Python script for generating repetitive config files from a JSON description of networks
+Python script for generating repetitive config files from a JSON description of IPv4 networks
 
 ## Usage
 
@@ -29,7 +29,7 @@ Example file:
                 "size" : 27,
                 "per-row": 1,
                 "name": "Deltakerrad",
-                "number" : 10
+                "number" : 4
             },
             {
                 "size" : 26,
@@ -58,9 +58,9 @@ Available parameters:
 | name | The name from the JSON file. Appended with a number in case of multiples | Deltakerrad-3 |
 | network | Network address | 192.168.0.0 |
 | gateway | Gateway address | 192.168.0.1 |
-| start | Start of address range | 192.168.0.2 |
-| start_next | Next address after start | 192.168.0.3 |
-| end | The last assignable address | 192.168.0.254 |
+| start | Address after gateway | 192.168.0.2 |
+| end | Last assignable address | 192.168.0.254 |
+| addresses | List of usable addresses | 192.168.0.1 - 192.168.0.254 |
 | broadcast | The broadcast address | 192.168.0.255 |
 | netmask | The netmask | 255.255.255.0 |
 | size | The network prefix size | 24 |

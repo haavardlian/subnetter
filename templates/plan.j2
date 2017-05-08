@@ -1,5 +1,5 @@
 {% if port == 1 %}
 | Row | Network | Gateway | Start IP | End IP | Netmask |
-------------------------------------------------------------
+---------------------------------------------------------
 {% endif %}
-| {{ name }} | {{ network }} | {{ gateway }} | {{ start }} | {{ end }} | {{ netmask }} |
+| {{ name }} | {{ network }} | {{ gateway }} | {{ addresses[0] }} | {{ addresses[-1] }} | {{ netmask }} |
