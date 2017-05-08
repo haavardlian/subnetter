@@ -47,7 +47,7 @@ Available parameters:
 
 | Parameter | Description | Example value |
 | --------- | ----------- | ------------- |
-| port | Port number. Auto-increments from 0 | 3 |
+| port | Port number. Auto-increments from 1 | 3 |
 | name | The name from the JSON file. Appended with a number in case of multiples | Deltakerrad-3 |
 | network | Network address | 192.168.0.0 |
 | gateway | Gateway address | 192.168.0.1 |
