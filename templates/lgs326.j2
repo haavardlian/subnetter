@@ -1,0 +1,34 @@
+config-file-header
+{{ row }}
+v1.1.0.21
+CLI v1.0
+set system 
+@
+ip access-list extended Administration
+exit
+hostname {{ row }}
+management access-list Administration
+permit ip-source 10.0.1.100 mask 255.255.254.0 gigabitethernet26 
+exit
+management access-class Administration
+username admin password encrypted <SECRET> privilege 15 
+snmp-server server
+snmp-server location {{ row }}
+snmp-server contact "Casual Gaming"
+no snmp-server enable traps
+no snmp-server trap authentication
+snmp-server community public ro 10.0.1.100 view Default 
+snmp-server group public v2 read Default 
+clock timezone " " 0 minutes 0
+clock source sntp
+sntp unicast client poll
+sntp server 129.240.2.6 
+sntp server 129.241.0.99 
+ip name-server  8.8.8.8 8.8.4.4
+!
+interface vlan 1
+ ip address {{ start }} {{ netmask }}
+ no ip address dhcp 
+!
+exit
+ip default-gateway {{ gateway }}

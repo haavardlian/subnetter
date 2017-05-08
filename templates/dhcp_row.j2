@@ -1,0 +1,8 @@
+# {{ row }}, port: {{ port }}
+subnet {{ network }} netmask {{ netmask }}  {
+    option subnet-mask {{ netmask }} ;
+    option routers {{ gateway }};
+    option domain-name "{{ row }}.somelan";
+    ddns-domainname "{{ row }}.somelan";
+    range {{ start }} {{ end }};
+}

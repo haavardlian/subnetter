@@ -1,0 +1,8 @@
+# {{ row }}
+subnet {{ network }} netmask {{ netmask }}  {
+    option subnet-mask {{ netmask }} ;
+    option routers {{ gateway }};
+    option domain-name "pp25.polarparty.no";
+    ddns-domainname "pp25.polarparty.no";
+    range {{ start }} {{ end }};
+}

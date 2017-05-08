@@ -1,0 +1,23 @@
+# {{ row }}, port: {{ port }}
+subnet {{ network }} netmask {{ netmask }}  {
+    pool {
+        allow unknown-clients;
+        deny members of "linksys";
+        option subnet-mask {{ netmask }} ;
+        option routers {{ gateway }};
+        option domain-name "{{ row|lower }}.trondelan.no";
+        ddns-domainname "{{ row|lower }}.trondelan.no";
+        range {{ start_next }} {{ end }};
+    }
+    pool {
+        default-lease-time 100;
+        max-lease-time 100;
+        option subnet-mask {{ netmask }} ;
+        option routers {{ gateway }};
+        range {{ start }} {{ start }};
+        allow members of "linksys";
+        on commit {
+            execute("/lgs326.py -c {{ row }} -s {{ start }} -t TFTP_IP");
+        }
+    }
+}

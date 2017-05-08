@@ -1,0 +1,6 @@
+!
+interface GigabitEthernet1/0/{{ port }}
+ description {{ row }}
+ no switchport
+ ip address {{ gateway }} {{ netmask }}
+ ip helper-address 84.16.205.132

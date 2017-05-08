@@ -1,0 +1,23 @@
+[
+	{
+		"network" : "10.0.0.0/23",
+		"subnets" : [
+			{
+				"size" : 27,
+				"per-row": 1,
+				"name": "Deltakerrad",
+				"number" : 10
+			},
+			{
+				"size" : 26,
+				"name" : "Tech",
+				"number" : 1
+			},
+			{
+				"size" : 26,
+				"name" : "Wireless",
+				"number" : 1
+			}
+		]
+	}
+]

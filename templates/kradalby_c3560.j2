@@ -1,0 +1,7 @@
+interface FastEthernet0/{{ port }}
+ description {{ row }}
+ no switchport
+ no shutdown
+ ip address {{ gateway }} {{ netmask }}
+ ip helper-address 10.0.1.100
+!
