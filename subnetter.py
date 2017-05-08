@@ -151,7 +151,7 @@ def main():
             if args.file:
                 if not path.exists(args.out_dir):
                     makedirs(args.out_dir)
-                write_to_file(args.out_dir, attributes['row'], create_config_from_template(args.template, attributes))
+                write_to_file(args.out_dir, attributes['name'], create_config_from_template(args.template, attributes))
             else:
                 print(create_config_from_template(args.template, attributes))
 
