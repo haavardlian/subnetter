@@ -6,8 +6,7 @@ pipeline:
             - pip install flake8 pyinstaller
             - pip install -r requirements.txt
             - flake8
-            - pyinstaller -F subnetter.py
-            - mv dist/subnetter dist/subnetter-linux-x64
+            - pyinstaller -F -n subnetter-linux-x64 subnetter.py
     github_release:
         image: plugins/github-release
         files: dist/*
