@@ -9,6 +9,6 @@ pipeline:
             - pyinstaller -F -n subnetter-linux-x64 subnetter.py
     github_release:
         image: plugins/github-release
-        files: dist/*
+        files: dist/subnetter-linux-x64
         when:
             event: tag
