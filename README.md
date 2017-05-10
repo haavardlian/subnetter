@@ -1,5 +1,5 @@
 # subnetter
-[![Build Status](https://drone.64bit.no/api/badges/haavardlian/subnetter/status.svg)](https://drone.fap.no/haavardlian/subnetter)
+[![Build Status](https://drone.64bit.no/api/badges/haavardlian/subnetter/status.svg)](https://drone.64bit.no/haavardlian/subnetter)
 
 Python script for generating repetitive config files from a JSON description of ip networks.
 
