@@ -31,11 +31,7 @@ class Subnet:
 
 
 def split_network(networks):
-    new_network = []
-    for net in networks:
-        new_network.extend(list(net.subnets()))
-
-    return list(new_network)
+    return sum([list(net.subnets()) for net in networks], [])
 
 
 def merge_networks(networks):
@@ -67,8 +63,8 @@ def get_network_attributes(subnet, port):
     }
 
 
-def write_to_file(out_dir, name, content):
-    with open('{}/{}'.format(out_dir, name), 'w') as file:
+def write_to_file(file_path, content):
+    with open(file_path, 'w') as file:
         file.write(content)
 
 
@@ -77,19 +73,24 @@ def main():
                                                  ' and generates config files based on jinja2 templates.')
     parser.add_argument('-n', '--network', dest='network_file', action='store', required=True,
                         help='File containing network description in JSON format')
-    parser.add_argument('-t', '--template', dest='template', default='./templates', action='store',
-                        help='jinja2 template', required=True)
+    parser.add_argument('-t', '--template', dest='template', action='store', help='jinja2 template', required=True)
     parser.add_argument('-f', '--file', dest='file', action='store_true',
-                        help='Output each resulting network to a file')
+                        help='Output each resulting network to a file', default=False)
     parser.add_argument('-o', '--output-dir', dest='out_dir', action='store', default='./output', required=False,
                         help='Folder to store files in')
 
-    parser.set_defaults(file=False)
-
     args = parser.parse_args()
 
-    with open(args.network_file) as json_file:
-        json_data = json.load(json_file)
+    try:
+        with open(args.network_file) as json_file:
+            json_data = json.load(json_file)
+    except FileNotFoundError:
+        print('{} was not found'.format(args.network_file), file=stderr)
+        return 1
+
+    if not path.exists(args.template):
+        print('{} was not found'.format(args.template), file=stderr)
+        return 1
 
     for part in json_data:
         network = ipaddress.ip_network(part['network'])
@@ -114,12 +115,12 @@ def main():
                     smallest_network = subnet['size']
 
             if subnet['number'] > 1:
-                for i in range(0, subnet['number']):
+                for i in range(1, subnet['number'] + 1):
                     if subnet['per-row'] > 1:
-                        for j in range(0, subnet['per-row']):
-                            subnets.append(Subnet(subnet['size'], '{}-{}-{}'.format(subnet['name'], i + 1, j + 1)))
+                        for j in range(1, subnet['per-row'] + 1):
+                            subnets.append(Subnet(subnet['size'], '{}-{}-{}'.format(subnet['name'], i, j)))
                     else:
-                        subnets.append(Subnet(subnet['size'], '{}-{}'.format(subnet['name'], i + 1)))
+                        subnets.append(Subnet(subnet['size'], '{}-{}'.format(subnet['name'], i)))
             else:
                 subnets.append(Subnet(subnet['size'], subnet['name']))
 
@@ -138,13 +139,13 @@ def main():
             networks = split_network(networks)
 
         # Render templates and write to stdout or file
-        for i, net in enumerate(sorted(subnets)):
-            attributes = get_network_attributes(net, i + 1)
+        for i, net in enumerate(sorted(subnets), 1):
+            attributes = get_network_attributes(net, i)
             rendered = create_config_from_template(args.template, attributes)
             if args.file:
                 if not path.exists(args.out_dir):
                     makedirs(args.out_dir)
-                write_to_file(args.out_dir, attributes['name'], rendered)
+                write_to_file(path.join(args.out_dir, attributes['name']), rendered)
             else:
                 print(rendered)
 

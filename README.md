@@ -17,7 +17,7 @@ Originally part of another repository found [here](https://github.com/kradalby/s
 The network description file is a JSON file that contain the networks what is used for generating the output.
 
 The base of the file is an array of network descriptions.
-Each description must contain a ```network``` and a ```subnet``` list.
+Each description must contain a ```network``` and a list of ```subnets```.
 Every subnet must specify its ```size``` and ```name```
 It can also specify a ```number``` and ```per-row``` parameter that describes how many config files should be generated for that subnet.
 Default values for these are 1. The total number of networks per entry is ```number * per-row```.
