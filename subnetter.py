@@ -5,12 +5,55 @@ import ipaddress
 import json
 import math
 
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+
 from os import makedirs, path
 
 from sys import exit, stderr
 
 from jinja2 import FileSystemLoader
 from jinja2.environment import Environment
+
+JSON_SCHEMA = {
+    "items": {
+        "properties": {
+            "network": {
+                "type": "string"
+            },
+            "subnets": {
+                "items": {
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "number": {
+                            "type": "integer"
+                        },
+                        "per-row": {
+                            "type": "integer"
+                        },
+                        "size": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "size"
+                    ],
+                    "type": "object"
+                },
+                "type": "array"
+            }
+        },
+        "required": [
+            "subnets",
+            "network"
+        ],
+        "type": "object"
+    },
+    "type": "array"
+}
 
 
 class Subnet:
@@ -92,8 +135,18 @@ def main():
         print('{} was not found'.format(args.template), file=stderr)
         return 1
 
+    try:
+        validate(json_data, JSON_SCHEMA)
+    except ValidationError as e:
+        print('{} is not valid. {}'.format(args.network_file, e.message))
+        return 1
+
     for part in json_data:
-        network = ipaddress.ip_network(part['network'])
+        try:
+            network = ipaddress.ip_network(part['network'])
+        except ValueError as e:
+            print(e)
+            return 1
         total = 0
         largest_network = network.max_prefixlen
         smallest_network = 0
