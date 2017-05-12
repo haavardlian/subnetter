@@ -158,6 +158,9 @@ def main():
                 continue
             if subnet['size'] < largest_network:
                 largest_network = subnet['size']
+            if subnet['size'] > network.max_prefixlen:
+                print('Cannot create a /{} network from {}'.format(subnet['size'], network), file=stderr)
+                return 1
 
             total += int(math.pow(2, network.max_prefixlen - subnet['size']) * subnet['number'] * subnet['per-row'])
 
