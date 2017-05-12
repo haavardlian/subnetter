@@ -60,9 +60,9 @@ docs/_build/
 # PyBuilder
 target/
 
-# JetBrains
+# IDEs
 .idea/
-
+.vscode/
 
 ### Vim ###
 [._]s[a-w][a-z]

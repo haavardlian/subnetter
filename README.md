@@ -60,6 +60,7 @@ Available parameters:
 | --------- | ----------- | ------------- |
 | port | Port number. Auto-increments from 1 | 3 |
 | name | The name from the JSON file. Appended with a number in case of multiples | Deltakerrad-3 |
+| prefix| The network prefix | 192.168.0.0/24 |
 | network | Network address | 192.168.0.0 |
 | gateway | Gateway address | 192.168.0.1 |
 | start | Address after gateway | 192.168.0.2 |

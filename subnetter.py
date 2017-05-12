@@ -10,7 +10,7 @@ from jsonschema.exceptions import ValidationError
 
 from os import makedirs, path
 
-from sys import exit, stderr
+from sys import stderr
 
 from jinja2 import FileSystemLoader
 from jinja2.environment import Environment
@@ -63,9 +63,6 @@ class Subnet:
         self.size = size
         self.name = name
 
-    def __str__(self):
-        return '{}: {}'.format(self.name, self.network)
-
     def matches(self, size):
         return self.network is None and self.size == size
 
@@ -95,6 +92,7 @@ def get_network_attributes(subnet, port):
     return {
         'port': port,
         'name': subnet.name,
+        'prefix': str(subnet.network),
         'network': addresses[0],
         'gateway': addresses[1],
         'broadcast': addresses[-1],
@@ -138,18 +136,17 @@ def main():
     try:
         validate(json_data, JSON_SCHEMA)
     except ValidationError as e:
-        print('{} is not valid. {}'.format(args.network_file, e.message))
+        print('{} is not valid. {}'.format(args.network_file, e.message), file=stderr)
         return 1
 
     for part in json_data:
         try:
             network = ipaddress.ip_network(part['network'])
         except ValueError as e:
-            print(e)
+            print(e, file=stderr)
             return 1
         total = 0
         largest_network = network.max_prefixlen
-        smallest_network = 0
         subnets = []
         # Create all subnets
         for subnet in part['subnets']:
@@ -159,13 +156,10 @@ def main():
                 subnet['number'] = 1
             if subnet['number'] == 0:
                 continue
+            if subnet['size'] < largest_network:
+                largest_network = subnet['size']
 
             total += int(math.pow(2, network.max_prefixlen - subnet['size']) * subnet['number'] * subnet['per-row'])
-
-            if subnet['size'] < largest_network:
-                    largest_network = subnet['size']
-            if subnet['size'] > smallest_network:
-                    smallest_network = subnet['size']
 
             if subnet['number'] > 1:
                 for i in range(1, subnet['number'] + 1):
@@ -179,7 +173,7 @@ def main():
 
         # Check if we have enough addresses
         if total > network.num_addresses:
-            print('Can\'t fit subnets into network :(. Tried to fit {} addresses into {} ({} addresses)'
+            print('Can\'t fit subnets into network :(. Tried to fit {} addresses into {} ({} addresses).'
                   .format(total, network, network.num_addresses), file=stderr)
             return 1
 
@@ -203,10 +197,10 @@ def main():
                 print(rendered)
 
         # Print info about remaining networks
-        if len(networks):
+        if networks:
             merged = [str(net) for net in merge_networks(networks)]
-            s = 's' if len(merged) > 1 else ''
-            print("Remaining network{}: {}".format(s, ", ".join(merged)), file=stderr)
+            plural = 's' if len(merged) > 1 else ''
+            print('Remaining network{}: {}'.format(plural, ', '.join(merged)), file=stderr)
     return 0
 
 
