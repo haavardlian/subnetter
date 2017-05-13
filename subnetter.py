@@ -115,8 +115,8 @@ def main():
     parser.add_argument('-n', '--network', dest='network_file', action='store', required=True,
                         help='File containing network description in JSON format')
     parser.add_argument('-t', '--template', dest='template', action='store', help='jinja2 template', required=True)
-    parser.add_argument('-f', '--file', dest='file', action='store_true',
-                        help='Output each resulting network to a file', default=False)
+    parser.add_argument('-f', '--file', dest='file', action='store_true', default=False,
+                        help='Output each resulting network to a file')
     parser.add_argument('-o', '--output-dir', dest='out_dir', action='store', default='./output', required=False,
                         help='Folder to store files in')
 
@@ -202,8 +202,8 @@ def main():
         # Print info about remaining networks
         if networks:
             merged = [str(net) for net in merge_networks(networks)]
-            plural = 's' if len(merged) > 1 else ''
-            print('Remaining network{}: {}'.format(plural, ', '.join(merged)), file=stderr)
+            plural = 'networks' if len(merged) > 1 else 'network'
+            print('Remaining {}: {}'.format(plural, ', '.join(merged)), file=stderr)
     return 0
 
 

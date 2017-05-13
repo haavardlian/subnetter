@@ -1,14 +1,18 @@
 pipeline:
-    build:
-        image: python:3.5.3
+    flake:
+        image: python:3.5
         commands:
-            - pip install tox flake8 pyinstaller
+            - pip install flake8 pyinstaller
             - pip install -r requirements.txt
             - flake8
-            - tox
-            - pyinstaller -F -n subnetter-linux-x64 subnetter.py
+    build:
+        image: python:3.5
+        commands:
+            - pyinstaller -F -n subnetter-${DRONE_TAG}-linux-x64 subnetter.py
+        when:
+            event: tag
     github_release:
         image: plugins/github-release
-        files: dist/subnetter-linux-x64
+        files: dist/*
         when:
             event: tag
