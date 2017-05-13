@@ -10,7 +10,7 @@ from jsonschema.exceptions import ValidationError
 
 from os import makedirs, path
 
-from sys import stderr
+from sys import exit, stderr
 
 from jinja2 import FileSystemLoader
 from jinja2.environment import Environment
