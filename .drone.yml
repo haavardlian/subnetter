@@ -6,7 +6,7 @@ pipeline:
             - pip install -r requirements.txt
             - flake8
         when:
-            event: event: [push, pull_request, deployment]
+            event: [push, pull_request, deployment]
     build:
         image: python:3.5
         commands:
