@@ -9,14 +9,15 @@ Originally part of another repository found [here](https://github.com/kradalby/s
 
 | Parameter | Description | Default value |
 | --------- | ----------- | ------------- |
-| -n/--network  NETWORK | File containing network description in JSON format |  None. Required. |
+| -n/--network  NETWORK | File containing network description in JSON format |  None. |
+| -c/--csv CSV_FILE | File containing network description in Netbox CSV format |  None. |
 | -t/--template TEMPLATE | jinja2 template | None. Required. |
 | -f, --file | Output each resulting network to a file | None. Optional. |
 | -o/--output-dir OUT_DIR | Folder to store files in. Only has effect if -f is passed. | ./output |
 
 ### Network description file
 
-The network description file is a JSON file that contain the networks what is used for generating the output.
+The network description file is a JSON file that contain the networks that is used for generating the output.
 
 The base of the file is an array of network descriptions.
 Each description must contain a ```network``` and a list of ```subnets```.

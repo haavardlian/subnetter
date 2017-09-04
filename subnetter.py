@@ -1,58 +1,58 @@
 #!/usr/bin/env python
 
 import argparse
+import csv
 import ipaddress
 import json
 import math
 
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
-
 from os import makedirs, path
-
 from sys import exit, stderr
 
 from jinja2 import FileSystemLoader
 from jinja2.environment import Environment
 
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+
 JSON_SCHEMA = {
-    "items": {
-        "properties": {
-            "network": {
-                "type": "string"
+    'items': {
+        'properties': {
+            'network': {
+                'type': 'string'
             },
-            "subnets": {
-                "items": {
-                    "properties": {
-                        "name": {
-                            "type": "string"
+            'subnets': {
+                'items': {
+                    'properties': {
+                        'name': {
+                            'type': 'string'
                         },
-                        "number": {
-                            "type": "integer"
+                        'number': {
+                            'type': 'integer'
                         },
-                        "per-row": {
-                            "type": "integer"
+                        'per-row': {
+                            'type': 'integer'
                         },
-                        "size": {
-                            "type": "integer"
+                        'size': {
+                            'type': 'integer'
                         }
                     },
-                    "required": [
-                        "name",
-                        "size"
+                    'required': [
+                        'name',
+                        'size'
                     ],
-                    "type": "object"
+                    'type': 'object'
                 },
-                "type": "array"
+                'type': 'array'
             }
         },
-        "required": [
-            "subnets",
-            "network"
+        'required': [
+            'subnets',
+            'network'
         ],
-        "type": "object"
+        'type': 'object'
     },
-    "type": "array"
+    'type': 'array'
 }
 
 
@@ -109,19 +109,7 @@ def write_to_file(file_path, content):
         file.write(content)
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Divides networks based on JSON description'
-                                                 ' and generates config files based on jinja2 templates.')
-    parser.add_argument('-n', '--network', dest='network_file', action='store', required=True,
-                        help='File containing network description in JSON format')
-    parser.add_argument('-t', '--template', dest='template', action='store', help='jinja2 template', required=True)
-    parser.add_argument('-f', '--file', dest='file', action='store_true', default=False,
-                        help='Output each resulting network to a file')
-    parser.add_argument('-o', '--output-dir', dest='out_dir', action='store', default='./output', required=False,
-                        help='Folder to store files in')
-
-    args = parser.parse_args()
-
+def network_json(args):
     try:
         with open(args.network_file) as json_file:
             json_data = json.load(json_file)
@@ -188,16 +176,7 @@ def main():
                 subnet.network = networks.pop(0)
             networks = split_network(networks)
 
-        # Render templates and write to stdout or file
-        for i, net in enumerate(sorted(subnets), 1):
-            attributes = get_network_attributes(net, i)
-            rendered = create_config_from_template(args.template, attributes)
-            if args.file:
-                if not path.exists(args.out_dir):
-                    makedirs(args.out_dir)
-                write_to_file(path.join(args.out_dir, attributes['name']), rendered)
-            else:
-                print(rendered)
+        render(args, subnets)
 
         # Print info about remaining networks
         if networks:
@@ -206,6 +185,59 @@ def main():
             print('Remaining {}: {}'.format(plural, ', '.join(merged)), file=stderr)
     return 0
 
+
+def netbox_csv(args):
+    subnets = []
+    with open(args.csv_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if not row['description']:
+                continue
+            network = ipaddress.ip_network(row['prefix'])
+            subnet = Subnet(network.prefixlen, row['description'])
+            subnet.network = network
+            subnets.append(subnet)
+    render(args, subnets)
+    return 0
+
+
+def render(args, subnets):
+    # Render templates and write to stdout or file
+    for i, net in enumerate(sorted(subnets), 1):
+        attributes = get_network_attributes(net, i)
+        rendered = create_config_from_template(args.template, attributes)
+        if args.file:
+            if not path.exists(args.out_dir):
+                makedirs(args.out_dir)
+            write_to_file(path.join(args.out_dir, attributes['name']), rendered)
+        else:
+            print(rendered)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Parses IP networks from JSON or CSV description and generates config files based on jinja2 templates.')
+    parser.add_argument('-j', '--json', dest='network_file', action='store',
+                        help='File containing network description in JSON format')
+    parser.add_argument('-c', '--csv', dest='csv_file', action='store',
+                        help='File containing network description in Netbox CSV format')
+    parser.add_argument('-t', '--template', dest='template', action='store', help='jinja2 template', required=True)
+    parser.add_argument('-f', '--file', dest='file', action='store_true', default=False,
+                        help='Output each resulting network to a file')
+    parser.add_argument('-o', '--output-dir', dest='out_dir', action='store', default='./output', required=False,
+                        help='Folder to store files in')
+
+    args = parser.parse_args()
+
+    ret = 0
+    if args.network_file:
+        ret = network_json(args)
+    if args.csv_file and not ret:
+        ret = netbox_csv(args)
+    if not args.network_file and not args.csv_file:
+        print('No JSON or CSV file provided, nothing to do...', file=stderr)
+        ret = 1
+    return ret
 
 if __name__ == '__main__':
     exit(main())
